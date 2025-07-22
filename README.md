@@ -33,7 +33,7 @@ This is a simple **Time Tracking** application built with **Symfony**, **API Pla
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/time-tracking-app.git
+git clone https://github.com/Abudi7/time-tracking-app.git
 cd time-tracking-app
 ```
 
@@ -89,7 +89,7 @@ localStorage.setItem("token", "YOUR_JWT_TOKEN");
 
 ## 🛠 Tech Stack
 
-- Symfony 6
+- Symfony 7.3
 - API Platform
 - MySQL
 - LexikJWTAuthenticationBundle
@@ -101,7 +101,7 @@ localStorage.setItem("token", "YOUR_JWT_TOKEN");
 ## 📬 Contact
 
 Developed by **Abdulrhman Alshalal**  
-📧 Email: [your-email@example.com]  
+📧 Email: [casper.king14@gmail.com]  
 🌍 Location: Austria
 
 ---
