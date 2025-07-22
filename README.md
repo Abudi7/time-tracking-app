@@ -28,6 +28,63 @@ This is a simple **Time Tracking** application built with **Symfony**, **API Pla
 
 ---
 
+## 🐳 Docker Setup
+
+### docker-compose.yml
+
+```yaml
+version: '3.8'
+
+services:
+  symfony:
+    container_name: abud-App
+    image: shinsenter/symfony:latest
+    ports:
+      - "8888:80"
+    volumes:
+      - ./myproject:/var/www/html
+    depends_on:
+      - mysql
+    networks:
+      - abud-net
+
+  mysql:
+    image: mysql:8.0
+    container_name: abud-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: abud
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - abud-net
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: abud-pma
+    restart: always
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: admin
+      PMA_PASSWORD: admin
+      MYSQL_ROOT_PASSWORD: admin
+    depends_on:
+      - mysql
+    networks:
+      - abud-net
+
+volumes:
+  mysql_data:
+
+networks:
+  abud-net:
+    driver: bridge
+```
 ## 🐳 Getting Started with Docker
 
 ### 1. Clone the repository
