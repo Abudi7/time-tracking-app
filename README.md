@@ -28,6 +28,55 @@ This is a simple **Time Tracking** application built with **Symfony**, **API Pla
 
 ---
 
+## 🐳 Docker Setup
+
+### docker-compose.yml
+
+```yaml
+version: '3.8'
+
+services:
+  symfony:
+    image: shinsenter/symfony:php8.4
+    container_name: symfony-app
+    ports:
+      - "8080:80"
+    volumes:
+      - ./:/var/www/html/new_web_App
+    environment:
+      - APP_ENV=dev
+    depends_on:
+      - db
+
+  db:
+    image: mysql:8.0
+    container_name: mysql-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: symfony_db
+      MYSQL_USER: symfony
+      MYSQL_PASSWORD: symfony
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    restart: always
+    depends_on:
+      - db
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: root
+
+volumes:
+  db_data:
+```
 ## 🐳 Getting Started with Docker
 
 ### 1. Clone the repository
