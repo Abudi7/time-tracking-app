@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Time Tracking</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+  <div class="container mt-5">
+    <h1 class="text-center text-primary mb-4">⏱️ Time Tracking</h1>
+
+    <div class="text-center mb-4">
+      <button id="startBtn" class="btn btn-success me-2">🟢 Start Work</button>
+      <button id="stopBtn" class="btn btn-danger">🔴 End Work</button>
+    </div>
+
+    <div id="message" class="alert alert-info text-center" style="display: none;"></div>
+
+    <h3 class="mt-5 text-secondary">📋 My Time Records</h3>
+    <div class="table-responsive">
+      <table class="table table-striped table-hover mt-3 shadow-sm">
+        <thead class="table-primary">
+          <tr>
+            <th>Date</th>
+            <th>Day</th>
+            <th>Start Time</th>
+            <th>End Time</th>
+            <th>Duration (minutes)</th>
+            <th>Email</th>
+          </tr>
+        </thead>
+        <tbody id="timeTableBody">
+          <tr>
+            <td colspan="5" class="text-center">Loading...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const startBtn = document.getElementById("startBtn");
+    const stopBtn = document.getElementById("stopBtn");
+    const messageDiv = document.getElementById("message");
+    const tableBody = document.getElementById("timeTableBody");
+    const token = localStorage.getItem("token");
+
+    function showMessage(msg, type = 'info') {
+      messageDiv.className = `alert alert-${type} mt-4 text-center`;
+      messageDiv.innerHTML = msg;
+      messageDiv.style.display = "block";
+    }
+
+    function getDayName(dateString) {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', { weekday: 'long' });
+    }
+
+    function loadTimeData() {
+      fetch("http://localhost:8888/api/time/all", {
+        method: "GET",
+        headers: {
+          "Authorization": "Bearer " + token,
+          "Accept": "application/json"
+        }
+      })
+        .then(res => res.json())
+        .then(data => {
+          tableBody.innerHTML = "";
+          if (Array.isArray(data) && data.length > 0) {
+            data.forEach(entry => {
+              const date = entry.startAt.split("T")[0];
+              const dayName = getDayName(entry.startAt);
+              const startTime = new Date(entry.startAt).toLocaleTimeString();
+              const endTime = entry.endAt ? new Date(entry.endAt).toLocaleTimeString() : "—";
+              const duration = entry.durationInMinutes ?? "—";
+
+              const row = document.createElement("tr");
+              row.innerHTML = `
+                <td>${date}</td>
+                <td>${dayName}</td>
+                <td>${startTime}</td>
+                <td>${endTime}</td>
+                <td>${duration}</td>
+                <td>${entry.email}</td>
+              `;
+              tableBody.appendChild(row);
+            });
+          } else {
+            tableBody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">No time records found.</td></tr>`;
+          }
+        })
+        .catch(() => {
+          tableBody.innerHTML = `<tr><td colspan="5" class="text-danger text-center">Error loading time records.</td></tr>`;
+        });
+    }
+
+    startBtn.addEventListener("click", () => {
+      fetch("http://localhost:8888/api/time/start", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + token
+        }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.message) {
+          showMessage("✅ Work started successfully.<br>Start time: " + data.start_time, 'success');
+          loadTimeData();
+        } else {
+          showMessage("❌ Failed to start time tracking.", 'danger');
+        }
+      });
+    });
+
+    stopBtn.addEventListener("click", () => {
+      fetch("http://localhost:8888/api/time/stop", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + token
+        }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.duration_minutes !== undefined) {
+          showMessage("🕒 Work ended successfully.<br>Duration: " + data.duration_minutes + " minutes", 'primary');
+          loadTimeData();
+        } else {
+          showMessage("❌ Could not end time tracking: " + (data.error || ""), 'danger');
+        }
+      });
+    });
+
+    loadTimeData();
+  </script>
+</body>
+</html>
