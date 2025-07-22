@@ -37,45 +37,53 @@ version: '3.8'
 
 services:
   symfony:
-    image: shinsenter/symfony:php8.4
-    container_name: symfony-app
+    container_name: abud-App
+    image: shinsenter/symfony:latest
     ports:
-      - "8080:80"
+      - "8888:80"
     volumes:
-      - ./:/var/www/html/new_web_App
-    environment:
-      - APP_ENV=dev
+      - ./myproject:/var/www/html
     depends_on:
-      - db
+      - mysql
+    networks:
+      - abud-net
 
-  db:
+  mysql:
     image: mysql:8.0
-    container_name: mysql-db
+    container_name: abud-db
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: symfony_db
-      MYSQL_USER: symfony
-      MYSQL_PASSWORD: symfony
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: abud
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
     volumes:
-      - db_data:/var/lib/mysql
-    ports:
-      - "3306:3306"
+      - mysql_data:/var/lib/mysql
+    networks:
+      - abud-net
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
-    container_name: phpmyadmin
+    container_name: abud-pma
     restart: always
-    depends_on:
-      - db
     ports:
       - "8081:80"
     environment:
-      PMA_HOST: db
-      MYSQL_ROOT_PASSWORD: root
+      PMA_HOST: mysql
+      PMA_USER: admin
+      PMA_PASSWORD: admin
+      MYSQL_ROOT_PASSWORD: admin
+    depends_on:
+      - mysql
+    networks:
+      - abud-net
 
 volumes:
-  db_data:
+  mysql_data:
+
+networks:
+  abud-net:
+    driver: bridge
 ```
 ## 🐳 Getting Started with Docker
 
