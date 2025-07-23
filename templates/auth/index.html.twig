@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login/Register</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+  <div class="container mt-5">
+    <div class="row justify-content-center">
+      <div class="col-md-5">
+        <div class="card shadow-sm p-4">
+          <h3 class="mb-3 text-center text-primary">🔐 Login</h3>
+
+          <form id="loginForm">
+            <div class="mb-3">
+              <label for="loginEmail" class="form-label">Email</label>
+              <input type="email" class="form-control" id="loginEmail" required>
+            </div>
+
+            <div class="mb-3">
+              <label for="loginPassword" class="form-label">Password</label>
+              <input type="password" class="form-control" id="loginPassword" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Login</button>
+          </form>
+
+          <div id="loginMessage" class="mt-3 text-center text-danger"></div>
+
+          <div class="text-center mt-4">
+            <span>Don't have an account?</span>
+            <a href="#" data-bs-toggle="modal" data-bs-target="#registerModal">Register here</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Register Modal -->
+  <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content p-3">
+        <div class="modal-header">
+          <h5 class="modal-title text-success" id="registerModalLabel">📝 Register</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <form id="registerForm">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="registerEmail" class="form-label">Email</label>
+              <input type="email" class="form-control" id="registerEmail" required>
+            </div>
+
+            <div class="mb-3">
+              <label for="registerPassword" class="form-label">Password</label>
+              <input type="password" class="form-control" id="registerPassword" required>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-success">Register</button>
+          </div>
+        </form>
+        <div id="registerMessage" class="text-center text-danger mb-3"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- JavaScript Logic -->
+  <script>
+    // Login form handler
+    document.getElementById("loginForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const email = document.getElementById("loginEmail").value;
+    const password = document.getElementById("loginPassword").value;
+
+    fetch("http://localhost:8888/api/login", {
+        method: "POST",
+        headers: {
+        "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ email, password })
+    })
+        .then(response => response.json())
+        .then(data => {
+        if (data.redirect) {
+            document.getElementById("loginMessage").classList.remove("text-danger");
+            document.getElementById("loginMessage").classList.add("text-success");
+            document.getElementById("loginMessage").innerText = "✅ Login successful! Redirecting...";
+
+            // ⏱️ Redirect after 1 second to the time tracking page
+            setTimeout(() => {
+            window.location.href = data.redirect;
+            }, 1000);
+        } else {
+            document.getElementById("loginMessage").innerText = "❌ Invalid credentials";
+        }
+        })
+        .catch(() => {
+        document.getElementById("loginMessage").innerText = "❌ Login failed.";
+        });
+    });
+
+
+    // Register form handler
+    document.getElementById("registerForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const email = document.getElementById("registerEmail").value;
+    const password = document.getElementById("registerPassword").value;
+
+    fetch("http://localhost:8888/api/register", {
+        method: "POST",
+        headers: {
+        "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+        email,
+        password,
+        roles: ["ROLE_USER"], // json API expects roles
+        is_verified: true // Assuming new users are verified by default
+        })
+    })
+        .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to register');
+        }
+        return response.json();
+        })
+        .then(data => {
+        document.getElementById("registerMessage").classList.remove("text-danger");
+        document.getElementById("registerMessage").classList.add("text-success");
+        document.getElementById("registerMessage").innerText = "✅ Registration successful! You can now login.";
+        })
+        .catch(() => {
+        document.getElementById("registerMessage").innerText = "❌ Registration failed.";
+        });
+    });
+
+  </script>
+</body>
+</html>

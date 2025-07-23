@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Register{% endblock %}
+
+{% block body %}
+<div class="container d-flex justify-content-center align-items-center vh-100">
+    <div class="col-md-5">
+        <div class="card shadow p-4">
+            <h2 class="text-center text-primary mb-4">🔐 Please Sign In</h2>
+
+            {% if error %}
+                <div class="alert alert-danger text-center">
+                    {{ error.messageKey|trans(error.messageData, 'security') }}
+                </div>
+            {% endif %}
+
+            {% if app.user %}
+                <div class="alert alert-info text-center">
+                    You are logged in as <strong>{{ app.user.userIdentifier }}</strong>,
+                    <a href="{{ path('app_logout') }}" class="text-decoration-underline">Logout</a>
+                </div>
+            {% endif %}
+
+            <form method="post">
+                <div class="mb-3">
+                    <label for="username" class="form-label">Email</label>
+                    <input type="email" value="{{ last_username }}" name="_username" id="username" class="form-control" autocomplete="email" required autofocus>
+                </div>
+
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" name="_password" id="password" class="form-control" autocomplete="current-password" required>
+                </div>
+
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+                <button class="btn btn-primary w-100" type="submit">Login</button>
+            </form>
+
+            <div class="text-center mt-4">
+                <small class="text-muted">Don't have an account?
+                    <a href="/register" class="text-decoration-underline">Register</a>
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
